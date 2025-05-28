@@ -22,7 +22,7 @@ export interface MyAxiosInstance<T, Q> extends Omit<AxiosInstance, 'interceptors
   };
   getUri(config?: AxiosRequestConfig): string;
   request<R = RestResponse<T>, D = Q>(config: AxiosRequestConfig<D>): Promise<R>;
-  get<R = RestResponse<T>, D = Q>(url: string, config?: AxiosRequestConfig<D>): Promise<R>;
+  get<R = RestResponse<T>, D = Q>(url: string, params?: D, config?: AxiosRequestConfig<D>): Promise<R> 
   delete<R = RestResponse<T>, D = Q>(url: string, config?: AxiosRequestConfig<D>): Promise<R>;
   head<R = RestResponse<T>, D = Q>(url: string, config?: AxiosRequestConfig<D>): Promise<R>;
   options<R = RestResponse<T>, D = Q>(url: string, config?: AxiosRequestConfig<D>): Promise<R>;
@@ -130,6 +130,21 @@ export interface PageResult<T extends object = object> {
   currentPage?: number;
   // 分页大小 分页为true时必有值
   pageSize?: number;
+}
+
+
+/**
+ * Mybatis通用列表查询响应对象类型
+ */
+export interface MybatisPageResult<T extends object = object> {
+  // 列表数据
+  records: T [];
+  // 合计值
+  total: number;
+  // 当前页码 分页为true时必有值
+  current?: number;
+  // 分页大小 分页为true时必有值
+  size?: number;
 }
 
 /**

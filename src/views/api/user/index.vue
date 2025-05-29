@@ -40,7 +40,7 @@
                         </el-tag>
                     </template>
                 </el-table-column>
-                <el-table-column prop="balance" label="钱包余额(分)" width="120">
+                <el-table-column prop="balance" label="钱包余额(元)" width="120">
                     <template #default="{ row }">
                         {{ row.balance }}
                     </template>
@@ -122,7 +122,7 @@
                 <el-form-item label="用户邮箱" prop="email">
                     <el-input v-model="editUserForm.email" placeholder="请输入用户邮箱" />
                 </el-form-item>
-                <el-form-item label="钱包余额">
+                <el-form-item label="钱包余额(元)">
                     <el-input-number v-model="editUserForm.balance" :min="0" />
                 </el-form-item>
                 <el-form-item label="用户角色">
@@ -144,8 +144,8 @@
 
         <!-- 用户详情抽屉 -->
         <el-drawer v-model="detailDrawerVisible" title="用户详情" size="50%" :before-close="closeDetailDrawer">
-            <el-tabs>
-                <el-tab-pane label="基本信息">
+            <el-tabs v-model="activeTab" @tab-click="handleTabClick">
+                <el-tab-pane name="basic" label="基本信息">
                     <el-descriptions :column="1" border>
                         <el-descriptions-item label="用户昵称">{{ currentUserDetail?.userName }}</el-descriptions-item>
                         <el-descriptions-item label="用户账号">{{ currentUserDetail?.userAccount }}</el-descriptions-item>
@@ -156,7 +156,7 @@
                                 {{ currentUserDetail?.status === 0 ? '正常' : '封号' }}
                             </el-tag>
                         </el-descriptions-item>
-                        <el-descriptions-item label="钱包余额">{{ currentUserDetail?.balance }}</el-descriptions-item>
+                        <el-descriptions-item label="钱包余额(元)">{{ currentUserDetail?.balance }}</el-descriptions-item>
                         <el-descriptions-item label="创建时间">{{ currentUserDetail?.createTime }}</el-descriptions-item>
                         <el-descriptions-item label="访问密钥">{{ currentUserDetail?.accessKey }}</el-descriptions-item>
                         <el-descriptions-item label="秘密密钥">{{ currentUserDetail?.secretKey }}</el-descriptions-item>
@@ -167,7 +167,7 @@
                         </el-descriptions-item>
                     </el-descriptions>
                 </el-tab-pane>
-                <el-tab-pane label="积分明细">
+                <el-tab-pane name="points" label="积分明细">
                     <el-table :data="pointsTableData" v-loading="pointsLoading" stripe border style="width: 100%">
                         <el-table-column prop="createTime" label="操作时间" width="180" />
                         <el-table-column prop="channel" label="操作渠道" width="120" />
@@ -230,6 +230,7 @@ import type { PageQuery, MybatisPageResult } from '@i/utils/request'
 // 抽屉状态
 const detailDrawerVisible = ref(false)
 const currentUserDetail = ref<UserData>()
+const activeTab = ref('basic')
 
 // 积分明细表格数据
 const pointsTableData = ref<any[]>([])
@@ -249,6 +250,8 @@ const closeDetailDrawer = () => {
     pointsTableData.value = []
     pointsPagination.currentPage = 1
     pointsPagination.total = 0
+    // 重置标签页为基本信息
+    activeTab.value = 'basic'
 }
 
 // 积分明细分页大小改变
@@ -278,8 +281,34 @@ const showUserDetail = async (row: UserData) => {
             // 重置积分明细分页
             pointsPagination.currentPage = 1
             pointsPagination.pageSize = 10
-            // 加载积分明细
-            getPointsList(row.id as number)
+            // 默认显示基本信息标签页
+            activeTab.value = 'basic'
+        }
+    } catch (error) {
+        ElMessage.error('获取用户详情失败')
+        console.error('获取用户详情失败:', error)
+    }
+}
+
+// 处理标签页切换
+const handleTabClick = (tab: any) => {
+    if (currentUserDetail.value?.id) {
+        if (tab.props.name === 'points') {
+            // 切换到积分明细标签页时加载积分数据
+            getPointsList(currentUserDetail.value.id)
+        } else if (tab.props.name === 'basic') {
+            // 切换到基本信息标签页时重新获取用户详情
+            refreshUserDetail(currentUserDetail.value.id)
+        }
+    }
+}
+
+// 刷新用户详情
+const refreshUserDetail = async (id: number) => {
+    try {
+        const res = await userGet(id)
+        if (res.data) {
+            currentUserDetail.value = res.data
         }
     } catch (error) {
         ElMessage.error('获取用户详情失败')

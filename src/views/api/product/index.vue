@@ -361,7 +361,7 @@ const getProductList = async () => {
         if (response.status === 'success' && response.data) {
             const result = response.data as MybatisPageResult<ProductData>
             tableData.value = result.records
-            pagination.total = result.total
+            pagination.total =  Number(result.total)
         }
     } catch (error) {
         ElMessage.error('获取产品列表失败')

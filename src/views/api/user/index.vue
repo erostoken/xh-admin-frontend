@@ -333,7 +333,7 @@ const getPointsList = async (id: number) => {
         if (response.status === 'success' && response.data) {
             const result = response.data as MybatisPageResult<any>
             pointsTableData.value = result.records
-            pointsPagination.total = result.total
+            pointsPagination.total = Number(result.total)
         }
     } catch (error) {
         ElMessage.error('获取积分明细失败')
@@ -452,7 +452,7 @@ const getUserList = async () => {
         if (response.status === 'success' && response.data) {
             const result = response.data as MybatisPageResult<UserData>
             tableData.value = result.records
-            pagination.total = result.total
+            pagination.total = Number(result.total)
         }
     } catch (error) {
         ElMessage.error('获取用户列表失败')

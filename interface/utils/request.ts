@@ -101,7 +101,7 @@ export interface PageQuery<T extends object = object> {
   // 是否为导出请求
   isExport?: boolean;
   // 是否分页
-  isPage: boolean;
+  isPage?: boolean;
   // 当前页码 分页为true时必有值
   currentPage?: number;
   // 分页大小 分页为true时必有值
